@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { graphql, compose } from 'react-apollo';
+import React, {Component} from 'react';
+import {compose, graphql} from 'react-apollo';
 import gql from 'graphql-tag';
 import './App.css';
 import Chatbox from './Chatbox';
@@ -15,6 +15,7 @@ class App extends Component {
     if(from) {
       this.setState({from});
     }
+    this._subscribeToNewChats();
   }
 
   _createChat = async e => {
@@ -25,6 +26,33 @@ class App extends Component {
       });
       this.setState({ content: '' });
     }
+  };
+
+  _subscribeToNewChats = () => {
+    this.props.allChatsQuery.subscribeToMore({
+      document: gql`
+          subscription {
+              Chat(filter: { mutation_in: [CREATED] }) {
+                  node {
+                      id
+                      from
+                      content
+                      createdAt
+                  }
+              }
+          }
+      `,
+      updateQuery: (previous, { subscriptionData }) => {
+        const newChatLinks = [
+          ...previous.allChats,
+          subscriptionData.data.Chat.node
+        ];
+        return {
+          ...previous,
+          allChats: newChatLinks
+        };
+      }
+    });
   };
 
   render() {

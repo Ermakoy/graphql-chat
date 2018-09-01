@@ -47,23 +47,28 @@ class App extends Component {
           ...previous.allChats,
           subscriptionData.data.Chat.node
         ];
-        return {
+        const result = {
           ...previous,
           allChats: newChatLinks
         };
+        console.log(result, previous, subscriptionData);
+        return result;
       }
     });
   };
 
   render() {
+
     const allChats = this.props.allChatsQuery.allChats || [];
     return (
       <div className="">
         <div className="container">
           <h2>Chats</h2>
-          {allChats.map(message => (
-            <Chatbox key={message.id} message={message} />
-          ))}
+          <div className="messages">
+            {allChats.map(message => (
+              <Chatbox key={message.id} message={message} />
+            ))}
+          </div>
 
         <input
           value={this.state.content}
@@ -98,6 +103,7 @@ const CREATE_CHAT_MUTATION = gql`
         }
     }
 `;
+
 
 export default compose(
   graphql(ALL_CHATS_QUERY, { name: 'allChatsQuery' }),
